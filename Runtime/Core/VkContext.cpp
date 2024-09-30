@@ -14,9 +14,9 @@
 #include <fstream>
 #include <algorithm>
 #include <GLFW/glfw3.h>
-//#include <glog/logging.h>
 #include "../BaseDefine.h"
 #include "Window.h"
+#include "Foundation/Log.h"
 
 #ifndef NDEBUG
 #define ENABLE_VALIDATION_LAYERS
@@ -179,7 +179,7 @@ void VkContext::setupDebugMessager() {
     debugCreateInfo.pNext = nullptr;
 
     if(createDebugUtilsMessengerExt(m_instance, &debugCreateInfo, nullptr, &m_debugMessenger) != VK_SUCCESS) {
-        //LOG(FATAL) << "Failed to set up debug messenger!";
+        Log::Error("Failed to set up debug messenger!");
     }
 }
 
@@ -213,6 +213,7 @@ void VkContext::pickPhysicalDevice() {
     uint32_t deviceCount = 0;
     vkEnumeratePhysicalDevices(m_instance, &deviceCount, nullptr);
     //LOG_IF(FATAL, deviceCount == 0) << "failed to find GPUs with Vulkan support!";
+
 
     std::vector<VkPhysicalDevice> devices(deviceCount);
     vkEnumeratePhysicalDevices(m_instance, &deviceCount, devices.data());
@@ -304,6 +305,7 @@ void VkContext::createLogicalDevice() {
 
     VkResult result = vkCreateDevice(m_physicalDevice, &createInfo, nullptr, &m_device);
     //LOG_IF(ERROR, result != VK_SUCCESS) << "failed to create logical device!";
+    Log::ErrorIf(result != VK_SUCCESS, "failed to create logical device!");
 
     vkGetDeviceQueue(m_device, indices.graphicsFamily.value(), 0, &m_graphicsQueue);
     vkGetDeviceQueue(m_device, indices.presentFamily.value(), 0, &m_presentQueue);
@@ -423,6 +425,7 @@ void VkContext::createSwapChain() {
 
     const auto result = vkCreateSwapchainKHR(m_device, &createInfo, nullptr, &m_swapChain);
     //LOG_IF(ERROR, result != VK_SUCCESS) << "Failed to create swap chain!";
+    Log::ErrorIf(result != VK_SUCCESS, "Failed to create swap chain!");
 
     vkGetSwapchainImagesKHR(m_device, m_swapChain, &imageCount, nullptr);
     m_swapChainImages.resize(imageCount);
@@ -558,6 +561,7 @@ void VkContext::createGraphicsPipeline() {
     };
     auto result = vkCreatePipelineLayout(m_device, &layoutCreateInfo, nullptr, &m_pipelineLayout);
     //LOG_IF(ERROR, result != VK_SUCCESS) << "Failed to create pipeline layout!";
+    Log::ErrorIf(result != VK_SUCCESS, "Failed to create pipeline layout!");
 
     VkGraphicsPipelineCreateInfo pipelineCreateInfo {
         .sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
@@ -578,6 +582,7 @@ void VkContext::createGraphicsPipeline() {
     };
     result = vkCreateGraphicsPipelines(m_device, VK_NULL_HANDLE, 1, &pipelineCreateInfo, nullptr, &m_graphicsPipeline);
     //LOG_IF(ERROR, result != VK_SUCCESS) << "Failed to create graphics pipeline!";
+    Log::ErrorIf(result != VK_SUCCESS, "Failed to create graphics pipeline!");
 
     vkDestroyShaderModule(m_device, vertexShaderModule, nullptr);
     vkDestroyShaderModule(m_device, fragmentShaderModule, nullptr);
@@ -611,7 +616,7 @@ VkShaderModule VkContext::createShaderModule(const std::vector<char> &code) {
 
     VkShaderModule shaderModule;
     const auto result = vkCreateShaderModule(m_device, &createInfo, nullptr, &shaderModule);
-    //LOG_IF(ERROR, result != VK_SUCCESS) << "Failed to create shader module!";
+    Log::ErrorIf(result != VK_SUCCESS, "Failed to create shader module!");
 
     return shaderModule;
 }
@@ -679,7 +684,7 @@ void VkContext::createCommandPool() {
         .queueFamilyIndex = queueFamilyIndices.graphicsFamily.value()
     };
     const auto result = vkCreateCommandPool(m_device, &commandPoolCreateInfo, nullptr, &m_commandPool);
-    //LOG_IF(ERROR, result != VK_SUCCESS) << "Failed to create command pool!";
+    Log::ErrorIf(result != VK_SUCCESS, "Failed to create command pool!");
 }
 
 void VkContext::createCommandBuffers() {
@@ -690,7 +695,7 @@ void VkContext::createCommandBuffers() {
         .commandBufferCount = 1
     };
     const auto result = vkAllocateCommandBuffers(m_device, &commandBufferAllocateInfo, &m_commandBuffer);
-    //LOG_IF(ERROR, result != VK_SUCCESS) << "Failed to allocate command buffers!";
+    Log::ErrorIf(result != VK_SUCCESS, "Failed to allocate command buffers!");
 }
 
 void VkContext::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex) {
@@ -738,7 +743,7 @@ void VkContext::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imag
     vkCmdEndRenderPass(commandBuffer);
 
     result = vkEndCommandBuffer(commandBuffer);
-    //LOG_IF(ERROR, result != VK_SUCCESS) << "Failed to record command buffer!";
+    Log::ErrorIf(result != VK_SUCCESS, "Failed to record command buffer!");
 }
 
 void VkContext::createSyncObjects() {
@@ -754,7 +759,8 @@ void VkContext::createSyncObjects() {
     const auto result1 = vkCreateSemaphore(m_device, &semaphoreCreateInfo, nullptr, &m_imageAvailableSemaphore);
     const auto result2 = vkCreateSemaphore(m_device, &semaphoreCreateInfo, nullptr, &m_renderFinishedSemaphore);
     const auto result3 = vkCreateFence(m_device, &fenceCreateInfo, nullptr, &m_inFlightFence);
-    //LOG_IF(ERROR, result1 != VK_SUCCESS || result2 != VK_SUCCESS || result3 != VK_SUCCESS) << "Failed to create synchronization objects for a frame!";
+    Log::ErrorIf(result1 != VK_SUCCESS || result2 != VK_SUCCESS || result3 != VK_SUCCESS, 
+        "Failed to create synchronization objects for a frame!");
 }
 
 void VkContext::DrawFrame() {
@@ -782,7 +788,6 @@ void VkContext::DrawFrame() {
     };
 
     const auto result = vkQueueSubmit(m_graphicsQueue, 1, &submitInfo, m_inFlightFence);
-    //LOG_IF(ERROR, result != VK_SUCCESS);
 
     VkSwapchainKHR swapChains[] = { m_swapChain };
     VkPresentInfoKHR presentInfoKhr {

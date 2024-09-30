@@ -1,10 +1,11 @@
-//#include <glog/logging.h>
 #include "Core/Application.h"
+#include "Foundation/Log.h"
 
 int main(int argc, char **argv) {
-    //google::InitGoogleLogging(argv[0]);
-    //google::SetStderrLogging(google::INFO);
+    //Log::GetInstance()->OnCreate();
 
     Application app;
     app.run();
+
+    //Log::GetInstance()->OnDestroy();
 }
