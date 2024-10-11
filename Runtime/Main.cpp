@@ -2,10 +2,10 @@
 #include "Foundation/Log.h"
 
 int main(int argc, char **argv) {
-    //Log::GetInstance()->OnCreate();
+    Log::GetInstance()->OnCreate();
 
     Application app;
     app.run();
 
-    //Log::GetInstance()->OnDestroy();
+    Log::GetInstance()->OnDestroy();
 }

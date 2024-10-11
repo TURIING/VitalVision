@@ -13,8 +13,9 @@ end
 
 set_toolset("cc", "clang-cl")
 set_toolset("cxx", "clang-cl")
-add_cxxflags("-std:c++20", { tools = { "clang-cl" }})
-add_defines("__cpp_consteval", { tools = { "clang-cl" }})
+add_defines("_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR")        -- 防止 mutex lock 崩溃
+-- add_cxxflags("-std:c++20", { tools = { "clang-cl" }})
+-- add_defines("__cpp_consteval", { tools = { "clang-cl" }})
 add_defines("NOMINMAX", "UNICODE", "_UNICODE")
 add_rules("mode.debug", "mode.releasedbg")
 set_arch("x64")
@@ -50,8 +51,8 @@ target("VitalVision")
     add_includedirs(RUNTIME_DIR)
     
     add_defines("PLATFORM_WIN")
-    add_defines("VULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1")
-    add_defines("VULKAN_HPP_NO_CONSTRUCTORS=1")
+    -- add_defines("VULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1")
+    -- add_defines("VULKAN_HPP_NO_CONSTRUCTORS=1")
 
     add_defines("_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING=1", "_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS=1")
 
